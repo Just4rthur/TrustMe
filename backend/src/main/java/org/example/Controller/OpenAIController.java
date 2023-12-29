@@ -5,12 +5,22 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class OpenAIController {
 
-    public static void main(String[] args) {
-        System.out.println(chatGPT("hello, who is Putin Trump?"));
-        // Prints out a response to the question.
+    public static ArrayList<String> getAIReviews(ArrayList<String> reviews) {
+        ArrayList<String> AIReviews = new ArrayList<>();
+
+        String promptOne = "Based on the following reviews, write 5 strengths this business has. Write only the 5 points, nothing else: ";
+        String promptTwo = "Based on the reviews, write 5 weaknesses this business has. Write only the 5 points, nothing else: ";
+        String promptThree = "Based on the reviews, write 5 action points to improve the business. Write only the 5 points, nothing else: ";
+
+        AIReviews.add(chatGPT(promptOne + reviews.toString()));
+        AIReviews.add(chatGPT(promptTwo + reviews.toString()));
+        AIReviews.add(chatGPT(promptThree + reviews.toString()));
+
+        return AIReviews;
     }
 
     public static String chatGPT(String message) {
