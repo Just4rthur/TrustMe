@@ -18,10 +18,20 @@ import java.net.http.HttpResponse;
 public class Main {
     public static void main(String[] args) throws IOException {
         Javalin app = Javalin.create().start(8080);
+        app.addStaticFiles("/static");
+
         app.get("/", ReviewController::getReviewForPlace);
         MapsController mapsController = new MapsController();
         app.get("/test", mapsController::testMapCreation);
 
+    app.get("/search", ctx -> {
+        String companyName = ctx.queryParam("company");
+        // Hämta recensionsinformation baserat på företagsnamnet
+    
+        // Exempel: Skapa en JSON-sträng och skicka tillbaka till frontend
+        String reviewsJson = "{"strengths": [...], "flaws": [...], "strategy": [...] }";
+        ctx.result(reviewsJson);
+    });
     }
 }
 

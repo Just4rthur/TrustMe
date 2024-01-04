@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TrustME</title>
     <link href="style.css" rel="stylesheet">
+    <script src="script.js"></script>
 </head>
 
 <body>
@@ -13,7 +14,11 @@
         <a href="startsida.html"> 
             <h1>TrustME</h1>
         </a>
-        <input class="searchbar" type="text" placeholder="Sök företagsnamn">
+        <!---Lös action länk-->
+        <form id="searchForm">
+            <input type="text" id="companyName" placeholder="Sök företagsnamn">
+            <button type="button" onclick="searchCompany()">Sök</button>
+        </form>
     </header>
     <main>
     <div id="company-rating-container">
