@@ -261,7 +261,7 @@ public class ReviewController {
 
     public static void getReviewsForPlaceName(Context ctx) throws IOException, InterruptedException {
 
-        String companyName = ctx.pathParam("placeName");
+        String companyName = formatSpacesToURL(ctx.pathParam("placeName"));
         System.out.println("COMPANY NAME: " + companyName);
 
         // String apiKey = "";
@@ -286,6 +286,7 @@ public class ReviewController {
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         //Get the name of the place
+
         JsonObject jsonObject = JsonParser.parseString(response.body()).getAsJsonObject();
         if (jsonObject.has("results")) {
             JsonArray results = jsonObject.getAsJsonArray("results");
@@ -293,6 +294,13 @@ public class ReviewController {
             for (JsonElement result : results) {
                 JsonObject resultObject = result.getAsJsonObject();
                 name = resultObject.get("name").getAsString();
+            }
+
+            //Check if the place exists
+            if (results.isEmpty()) {
+                System.out.println("No results found");
+                ctx.result("No results found");
+                return;
             }
 
             //Get the coordinates of the place
