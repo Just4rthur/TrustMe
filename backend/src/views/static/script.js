@@ -1,4 +1,33 @@
 // Funktion för att hämta recensioninformation för ett företag
+async function getReviewForPlaceName(searchParam){
+    var companyName = searchParam;
+
+    //Control if there is something in the search field
+    if (!companyName) {
+        alert("Sök på företag.");
+        return;
+    }
+
+    showProgress();
+
+    //Make a http-request to the backend with the company name
+    fetch('http://localhost:8080/places/' + companyName, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            updatePage(data);
+            hideProgress()
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+}
+
 async function getReviewForPlace(searchParam) {
     var companyName = searchParam;
 
@@ -94,7 +123,7 @@ function checkAndLoadSearchParam() {
     const searchParam = new URLSearchParams(window.location.search).get('search');
     console.log(searchParam)
     if (searchParam) {
-        getReviewForPlace(searchParam);
+        getReviewForPlaceName(searchParam);
     }
 }
 
