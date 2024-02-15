@@ -58,7 +58,7 @@ h1 {
 
 /* Placering för underrubriken på indexsidan */
 #h2-index {
-    margin-left: -690px;
+    margin-right: 690px;
     font-size: 40px;
     top: 200px;
 }
