@@ -352,3 +352,9 @@ progress {
     margin: 30px;
     color: rgb(0, 0, 0);
 }
+#errorMessage {
+    visibility: hidden;
+}
+#errorMessageVis {
+    visibility: visable;
+}

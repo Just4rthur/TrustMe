@@ -1,8 +1,7 @@
-// Funktion för att hämta recensioninformation för ett företag
 async function getReviewForPlaceName(searchParam){
     var companyName = searchParam;
 
-    //Control if there is something in the search field
+    // Kontrollera om det finns något i sökfältet
     if (!companyName) {
         alert("Sök på företag.");
         return;
@@ -10,23 +9,40 @@ async function getReviewForPlaceName(searchParam){
 
     showProgress();
 
-    //Make a http-request to the backend with the company name
-    fetch('http://localhost:8080/places/' + companyName, {
+    // Gör en HTTP-begäran till backend med företagsnamnet
+    try {
+        const response = await fetch('http://localhost:8080/places/' + companyName, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-            updatePage(data);
-            hideProgress()
-        })
-        .catch((error) => {
-            console.error('Error:', error);
         });
+
+        // Kontrollera om svaret är framgångsrikt
+        if (!response.ok) {
+            throw new Error('Network response was not ok.');
+        }
+
+        // Försök att parsa svaret som JSON
+        const data = await response.json();
+
+        // Kontrollera om det finns data att visa
+        if (data) {
+            console.log('Success', data);
+            updatePage(data);
+            hideProgress();
+        } else {
+            // Inga resultat hittades
+            throw new Error('No results found');
+        }
+    } catch (error) {
+        console.error('Error:', error.message);
+        alert("The Company you searched for doesnt exist!")
+        // Visa felmeddelande till användaren
+        hideProgress();
+    }
 }
+
 
 async function getReviewForPlace(searchParam) {
     var companyName = searchParam;
@@ -84,25 +100,33 @@ function searchAndRedirect(searchParam) {
 
 // Funktion för att uppdatera sida med aktuell data
 function updatePage(data) {
-    // Uppdatera sidan med Google-information
-    const googleData = data.google;
-    document.getElementById("name").innerText = googleData.name;
+    // Kontrollera om det finns Google-data att visa
+    if (data && data.google) {
+        // Uppdatera sidan med Google-information
+        const googleData = data.google;
+        document.getElementById("name").innerText = googleData.name;
 
-    // Uppdaterar sidan med information från openAI
-    const aiData = data.openAI;
-    document.getElementById("strengths-data").innerText = aiData.strengths;
-    document.getElementById("flaws-data").innerText = aiData.weaknesses;
-    document.getElementById("strategy-data").innerText = aiData.action_points;
+        // Uppdaterar sidan med information från openAI
+        const aiData = data.openAI;
+        document.getElementById("strengths-data").innerText = aiData.strengths;
+        document.getElementById("flaws-data").innerText = aiData.weaknesses;
+        document.getElementById("strategy-data").innerText = aiData.action_points;
 
-    // Hitta kartelementet
-    const mapImage = document.getElementById("mapImage");
+        // Hitta kartelementet
+        const mapImage = document.getElementById("mapImage");
 
-    // Kontrollera om det finns data för Google
-    if (data && data.google && data.google.map) {
-        mapImage.src = data.google.map;
+        // Kontrollera om det finns data för Google
+        if (data.google.map) {
+            mapImage.src = data.google.map;
+        } else {
+            mapImage.src = ""; // Rensa kartan
+            document.getElementById("error-message").innerText = "Ingen kartinformation tillgänglig.";
+            document.getElementById("error-message").style.display = "block";
+        }
     } else {
-        mapImage.src = ""; // Rensa kartan
-        alert("Ingen kartinformation tillgänglig.");
+        // Visa varning om det inte finns någon data att visa
+        document.getElementById("error-message").innerText = "Inga uppgifter hittades för det angivna företaget. Var god försök med ett annat företagsnamn.";
+        document.getElementById("error-message").style.display = "block";
     }
 }
 

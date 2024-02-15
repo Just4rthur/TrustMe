@@ -1,4 +1,5 @@
 package org.example.Controller;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.javalin.http.Context;
@@ -19,7 +20,7 @@ public class OpenAIController {
 
     public static void chatGPT(Context ctx) {
         String url = "https://api.openai.com/v1/chat/completions";
-        String apiKey = ""; //Write API-Key here
+        String apiKey = ""; // Write API-Key here
         String model = "gpt-3.5-turbo";
         String jsonBody = ctx.body();
         JsonObject jsonObject = JsonParser.parseString(jsonBody).getAsJsonObject();
@@ -31,11 +32,12 @@ public class OpenAIController {
                 .uri(URI.create(url))
                 .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString("{\"model\": \"" + model + "\", \"messages\": [{\"role\": \"user\", \"content\": \"" + message.replace("\n", "") + "\"}]}"))
+                .POST(HttpRequest.BodyPublishers
+                        .ofString("{\"model\": \"" + model + "\", \"messages\": [{\"role\": \"user\", \"content\": \""
+                                + message.replace("\n", "") + "\"}]}"))
                 .build();
 
-
-        try{
+        try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             String responseBody = response.body();
@@ -43,7 +45,8 @@ public class OpenAIController {
 
             System.out.println(object.getAsJsonObject().toString());
 
-            String stringResponse = object.getAsJsonObject().get("choices").getAsJsonArray().get(0).getAsJsonObject().get("message").getAsJsonObject().get("content").getAsString();
+            String stringResponse = object.getAsJsonObject().get("choices").getAsJsonArray().get(0).getAsJsonObject()
+                    .get("message").getAsJsonObject().get("content").getAsString();
 
             JsonObject json = new JsonObject();
             json.addProperty("response", stringResponse);
@@ -57,7 +60,7 @@ public class OpenAIController {
 
     public static void test(Context ctx) {
         String url = "https://api.openai.com/v1/chat/completions";
-        String apiKey = ""; //Write API-Key here
+        String apiKey = ""; // Write API-Key here
         String model = "gpt-3.5-turbo";
         String jsonBody = ctx.body();
         JsonObject jsonObject = JsonParser.parseString(jsonBody).getAsJsonObject();
@@ -70,7 +73,8 @@ public class OpenAIController {
             con.setRequestProperty("Authorization", "Bearer " + apiKey);
             con.setRequestProperty("Content-Type", "application/json");
 
-            String body = "{\"model\": \"" + model + "\", \"messages\": [{\"role\": \"user\", \"content\": \"" + message + "\"}]}";
+            String body = "{\"model\": \"" + model + "\", \"messages\": [{\"role\": \"user\", \"content\": \"" + message
+                    + "\"}]}";
             con.setDoOutput(true);
             OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream());
             writer.write(body);
@@ -95,7 +99,7 @@ public class OpenAIController {
     }
 
     public static String extractContentFromResponse(String response) {
-        int startMarker = response.indexOf("content")+11; // Marker for where the content starts.
+        int startMarker = response.indexOf("content") + 11; // Marker for where the content starts.
         int endMarker = response.indexOf("\"", startMarker); // Marker for where the content ends.
         return response.substring(startMarker, endMarker); // Returns the substring containing only the response.
     }

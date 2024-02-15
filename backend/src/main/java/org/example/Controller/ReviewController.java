@@ -34,7 +34,8 @@ public class ReviewController {
 
         // String apiKey = "";
         String placeId = "";
-        String textSearchUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + companyName + "&key=" + API_KEY_GOOGLE;
+        String textSearchUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + companyName
+                + "&key=" + API_KEY_GOOGLE;
         double lat = 0;
         double lng = 0;
         double northEastLat = 0;
@@ -53,7 +54,7 @@ public class ReviewController {
 
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        //Get the name of the place
+        // Get the name of the place
         JsonObject jsonObject = JsonParser.parseString(response.body()).getAsJsonObject();
         if (jsonObject.has("results")) {
             JsonArray results = jsonObject.getAsJsonArray("results");
@@ -63,22 +64,27 @@ public class ReviewController {
                 name = resultObject.get("name").getAsString();
             }
 
-            //Get the coordinates of the place
-            lat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("location").getAsJsonObject().get("lat").getAsDouble();
-            lng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("location").getAsJsonObject().get("lng").getAsDouble();
+            // Get the coordinates of the place
+            lat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("location").getAsJsonObject()
+                    .get("lat").getAsDouble();
+            lng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("location").getAsJsonObject()
+                    .get("lng").getAsDouble();
 
-            //Get the address of the place
+            // Get the address of the place
             address = results.get(0).getAsJsonObject().get("formatted_address").getAsString();
 
-
-            //Get the northwestern and southwestern coordinates of the place
-            northEastLat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport").getAsJsonObject().get("northeast").getAsJsonObject().get("lat").getAsDouble();
-            northEastLng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport").getAsJsonObject().get("northeast").getAsJsonObject().get("lng").getAsDouble();
-            southWestLat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport").getAsJsonObject().get("southwest").getAsJsonObject().get("lat").getAsDouble();
-            southWestLng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport").getAsJsonObject().get("southwest").getAsJsonObject().get("lng").getAsDouble();
+            // Get the northwestern and southwestern coordinates of the place
+            northEastLat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport")
+                    .getAsJsonObject().get("northeast").getAsJsonObject().get("lat").getAsDouble();
+            northEastLng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport")
+                    .getAsJsonObject().get("northeast").getAsJsonObject().get("lng").getAsDouble();
+            southWestLat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport")
+                    .getAsJsonObject().get("southwest").getAsJsonObject().get("lat").getAsDouble();
+            southWestLng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport")
+                    .getAsJsonObject().get("southwest").getAsJsonObject().get("lng").getAsDouble();
         }
 
-        //Get the place id
+        // Get the place id
         if (jsonObject.has("results")) {
             JsonArray results = jsonObject.getAsJsonArray("results");
 
@@ -91,10 +97,10 @@ public class ReviewController {
             }
         }
 
-        //Get the reviews of the place
+        // Get the reviews of the place
         JsonArray reviews = getReviews(ctx, placeId, API_KEY_GOOGLE, lat, lng);
 
-        //OpenAI sending of reviews
+        // OpenAI sending of reviews
         ArrayList<String> openAIResponse = new ArrayList<>();
         StringBuilder reviewsString = new StringBuilder();
 
@@ -104,19 +110,16 @@ public class ReviewController {
             reviewsString.append(reviewText).append(" ");
         }
 
-
         ArrayList<String> AIReview = getAIReviews(openAIResponse);
 
-
         MapsController mapsController = new MapsController();
-        String map = mapsController.handleMapCreation(new double[]{lat, lng});
+        String map = mapsController.handleMapCreation(new double[] { lat, lng });
 
         if (response.statusCode() == 200) {
             JsonObject json = new JsonObject();
             JsonObject google = new JsonObject();
             JsonObject foursquare = new JsonObject();
             JsonObject openAI = new JsonObject();
-
 
             google.addProperty("name", name);
             google.addProperty("placeId", placeId);
@@ -134,7 +137,7 @@ public class ReviewController {
 
             google.add("reviews", reviews);
 
-            //OpenAI properties
+            // OpenAI properties
             openAI.addProperty("strengths", AIReview.get(0));
             openAI.addProperty("weaknesses", AIReview.get(1));
             openAI.addProperty("action_points", AIReview.get(2));
@@ -143,9 +146,7 @@ public class ReviewController {
             json.add("foursquare", foursquare);
             json.add("openAI", openAI);
 
-
             FoursquareAPI.getFoursquarePlaces(ctx, json);
-
 
             String jsonString = json.toString();
             System.out.println(jsonString);
@@ -158,9 +159,10 @@ public class ReviewController {
 
     }
 
-    //This method gets the reviews of the place using the place id
+    // This method gets the reviews of the place using the place id
     public static JsonArray getReviews(Context ctx, String placeId, String API_KEY, double lat, double lng) {
-        String detailsUrl = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeId + "&key=" + API_KEY;
+        String detailsUrl = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeId + "&key="
+                + API_KEY;
         JsonArray reviewsJsonArray = new JsonArray();
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -186,11 +188,10 @@ public class ReviewController {
                 }
             }
 
-            //Get the reviews of the place
+            // Get the reviews of the place
             for (String review : reviewsArray) {
                 reviewsJsonArray.add(review);
             }
-
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -209,11 +210,12 @@ public class ReviewController {
                 .uri(URI.create(url))
                 .header("Authorization", "Bearer " + API_KEY_AI)
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString("{\"model\": \"" + model + "\", \"messages\": [{\"role\": \"user\", \"content\": \"" + message.replace("\n", "") + "\"}]}"))
+                .POST(HttpRequest.BodyPublishers
+                        .ofString("{\"model\": \"" + model + "\", \"messages\": [{\"role\": \"user\", \"content\": \""
+                                + message.replace("\n", "") + "\"}]}"))
                 .build();
 
-
-        try{
+        try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             String responseBody = response.body();
@@ -221,7 +223,8 @@ public class ReviewController {
 
             System.out.println(object.getAsJsonObject().toString());
 
-            String stringResponse = object.getAsJsonObject().get("choices").getAsJsonArray().get(0).getAsJsonObject().get("message").getAsJsonObject().get("content").getAsString();
+            String stringResponse = object.getAsJsonObject().get("choices").getAsJsonArray().get(0).getAsJsonObject()
+                    .get("message").getAsJsonObject().get("content").getAsString();
 
             return stringResponse;
 
@@ -255,7 +258,7 @@ public class ReviewController {
         return AIReviews;
     }
 
-    public static String formatSpacesToURL(String string){
+    public static String formatSpacesToURL(String string) {
         return string.replace(" ", "%20");
     }
 
@@ -266,7 +269,8 @@ public class ReviewController {
 
         // String apiKey = "";
         String placeId = "";
-        String textSearchUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + companyName + "&key=" + API_KEY_GOOGLE;
+        String textSearchUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + companyName
+                + "&key=" + API_KEY_GOOGLE;
         double lat = 0;
         double lng = 0;
         double northEastLat = 0;
@@ -285,7 +289,7 @@ public class ReviewController {
 
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        //Get the name of the place
+        // Get the name of the place
 
         JsonObject jsonObject = JsonParser.parseString(response.body()).getAsJsonObject();
         if (jsonObject.has("results")) {
@@ -296,29 +300,34 @@ public class ReviewController {
                 name = resultObject.get("name").getAsString();
             }
 
-            //Check if the place exists
+            // Check if the place exists
             if (results.isEmpty()) {
                 System.out.println("No results found");
                 ctx.result("No results found");
                 return;
             }
 
-            //Get the coordinates of the place
-            lat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("location").getAsJsonObject().get("lat").getAsDouble();
-            lng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("location").getAsJsonObject().get("lng").getAsDouble();
+            // Get the coordinates of the place
+            lat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("location").getAsJsonObject()
+                    .get("lat").getAsDouble();
+            lng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("location").getAsJsonObject()
+                    .get("lng").getAsDouble();
 
-            //Get the address of the place
+            // Get the address of the place
             address = results.get(0).getAsJsonObject().get("formatted_address").getAsString();
 
-
-            //Get the northwestern and southwestern coordinates of the place
-            northEastLat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport").getAsJsonObject().get("northeast").getAsJsonObject().get("lat").getAsDouble();
-            northEastLng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport").getAsJsonObject().get("northeast").getAsJsonObject().get("lng").getAsDouble();
-            southWestLat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport").getAsJsonObject().get("southwest").getAsJsonObject().get("lat").getAsDouble();
-            southWestLng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport").getAsJsonObject().get("southwest").getAsJsonObject().get("lng").getAsDouble();
+            // Get the northwestern and southwestern coordinates of the place
+            northEastLat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport")
+                    .getAsJsonObject().get("northeast").getAsJsonObject().get("lat").getAsDouble();
+            northEastLng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport")
+                    .getAsJsonObject().get("northeast").getAsJsonObject().get("lng").getAsDouble();
+            southWestLat = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport")
+                    .getAsJsonObject().get("southwest").getAsJsonObject().get("lat").getAsDouble();
+            southWestLng = results.get(0).getAsJsonObject().get("geometry").getAsJsonObject().get("viewport")
+                    .getAsJsonObject().get("southwest").getAsJsonObject().get("lng").getAsDouble();
         }
 
-        //Get the place id
+        // Get the place id
         if (jsonObject.has("results")) {
             JsonArray results = jsonObject.getAsJsonArray("results");
 
@@ -331,10 +340,10 @@ public class ReviewController {
             }
         }
 
-        //Get the reviews of the place
+        // Get the reviews of the place
         JsonArray reviews = getReviews(ctx, placeId, API_KEY_GOOGLE, lat, lng);
 
-        //OpenAI sending of reviews
+        // OpenAI sending of reviews
         ArrayList<String> openAIResponse = new ArrayList<>();
         StringBuilder reviewsString = new StringBuilder();
 
@@ -344,19 +353,16 @@ public class ReviewController {
             reviewsString.append(reviewText).append(" ");
         }
 
-
         ArrayList<String> AIReview = getAIReviews(openAIResponse);
 
-
         MapsController mapsController = new MapsController();
-        String map = mapsController.handleMapCreation(new double[]{lat, lng});
+        String map = mapsController.handleMapCreation(new double[] { lat, lng });
 
         if (response.statusCode() == 200) {
             JsonObject json = new JsonObject();
             JsonObject google = new JsonObject();
             JsonObject foursquare = new JsonObject();
             JsonObject openAI = new JsonObject();
-
 
             google.addProperty("name", name);
             google.addProperty("placeId", placeId);
@@ -374,7 +380,7 @@ public class ReviewController {
 
             google.add("reviews", reviews);
 
-            //OpenAI properties
+            // OpenAI properties
             openAI.addProperty("strengths", AIReview.get(0));
             openAI.addProperty("weaknesses", AIReview.get(1));
             openAI.addProperty("action_points", AIReview.get(2));
@@ -383,9 +389,7 @@ public class ReviewController {
             json.add("foursquare", foursquare);
             json.add("openAI", openAI);
 
-
             FoursquareAPI.getFoursquarePlaces(ctx, json);
-
 
             String jsonString = json.toString();
             System.out.println(jsonString);
