@@ -10,12 +10,12 @@ public class MapsController {
         API_KEY = loader.getApiKey("google.api.key");
     }
 
-
     // Tar emot en array med latitude och longitude
     public String handleMapCreation(double[] coordinates) {
         if (coordinates == null || coordinates.length != 2) {
             return "Error: False coordinates";
-        } if (API_KEY == null || API_KEY.isEmpty()) {
+        }
+        if (API_KEY == null || API_KEY.isEmpty()) {
             return "Error: API Key is not configured correctly";
         } else {
             try {
@@ -27,10 +27,11 @@ public class MapsController {
         }
     }
 
-    //Genererar en statisk bild
+    // Genererar en statisk bild
     private String generateStaticMapUrl(double latitude, double longitude) {
-        //URL för Google Static Maps API
-        //EX https://maps.googleapis.com/maps/api/staticmap?center=55.61427531137008,12.989121348455722&zoom=16&size=400x400&key=YOUR_API_KEY
+        // URL för Google Static Maps API
+        // EX
+        // https://maps.googleapis.com/maps/api/staticmap?center=55.61427531137008,12.989121348455722&zoom=16&size=400x400&key=YOUR_API_KEY
         return "https://maps.googleapis.com/maps/api/staticmap?center="
                 + latitude
                 + ","
